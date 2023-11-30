@@ -23,6 +23,8 @@
 
        서보혁 (2023.11.29) - 정점 추가, 간선 추가 시 pathfindingsystem 데이터베이스에 정보가 추가되는 기능 추가
        서보혁 (2023.11.29) - 정점 삭제 시 pathfindingsystem 데이터베이스에 정점 정보가 삭제되는 기능 추가. 정점 삭제에 따른 간선 삭제와 정점, 간선 아이디 수정은 데이터베이스 측에서 프로시저를 통해 구현함.
+
+       서보혁 (2023.11.30) - DB의 스토어드 프로시저 수정을 통해 간선 데이터 DB에 업로드 시 오류가 나는 현상 해결
  -->
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
@@ -55,8 +57,7 @@
 <p><em>지도를 클릭해주세요!</em></p>
 <p id="result"></p>
 <div id="clickLatlng"></div>
-
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=36d7d56dffc065ea26aa515b442d5b6f"></script>
+<script id="apikey" type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=36d7d56dffc065ea26aa515b442d5b6f"></script>
 <script type="text/javascript" src="/js/apikey.js"></script>
 <script>
     const MAP_API = config.apikey;
@@ -133,7 +134,9 @@
                     for (let i = 0; i < edgeInfo.length; i++) {
                         let v1 = edgeInfo[i].SWVertexID1 - 1;
                         let v2 = edgeInfo[i].SWVertexID2 - 1;
+                        //console.log(v1, v2);
                         tmpedges = [v1, v2];
+                        if(v1 > markers.length || v1 < 0 || v2 > markers.length || v2 < 0) console.log(v1, v2);
                         EdgeControl(markers[v2], 0);
                     }
                 } else { // 1, 즉 도로일 때 그에 맞게 간선 추가.
@@ -160,7 +163,7 @@
                 vertexInfo: vertexInfo
             },
             success: function () {
-                console.log(vertexInfo);
+                document.location.href = document.location.href;
             }
         });
     }
@@ -192,6 +195,7 @@
             /*간선 배열을 돌며 두 개의 마커 인덱스가 간선 배열에 들어가 있다면 해당 간선을 삭제하기 위해 isTrue를 0으로 설정한다.*/
             for (let j = 0; j < edges.length; j++) {
                 if ((edges[j][0] === tmpedges[0] && edges[j][1] === tmpedges[1]) || (edges[j][0] === tmpedges[1] && edges[j][1] === tmpedges[0])) {
+                    console.log(edges[j][0], edges[j][1]);
                     idx = j;
                     isTrue = 0;
                     break;
@@ -336,14 +340,15 @@
                     }
 
                     /*마커, 마커와 관련된 정보 삭제*/
-                    positions.splice(i, 1);
-                    markers.splice(i, 1);
-                    isDestinations.splice(i, 1);
-                    marker.infowindow.close();
                     let vertexInfo = "";
                     if(Road_OR_SideWalk === 0) vertexInfo += "0,";
                     else vertexInfo += "1,"
                     vertexInfo += (i + 1).toString() + "," + positions[i].getLat().toString() + "," + positions[i].getLng().toString() + "," + isDestinations[i].toString();
+                    positions.splice(i, 1);
+                    markers.splice(i, 1);
+                    isDestinations.splice(i, 1);
+                    marker.infowindow.close();
+                    console.log(vertexFromDB, i);
                     if(vertexFromDB > i) deleteVertexAtDB(vertexInfo); // DB에 저장되어 있는 정점일 시 DB에서 정점 정보 삭제
                     break;
                 }

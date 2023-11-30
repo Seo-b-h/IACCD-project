@@ -21,8 +21,8 @@ public class EdgeController {
 
     @PostMapping("/saveEdge")
     /*여러 개의 간선 정보들을 문자열 형태로 전달받아 DB에 저장한다.*/
-    public String saveVertex(EdgeInfo EdgeInfo) throws Exception {
-        logger.info("trace log={}", EdgeInfo.getEdge_info());
+    public String saveEdge(EdgeInfo EdgeInfo) throws Exception {
+        //logger.info("trace log={}", EdgeInfo.getEdge_info());
         String[] edge = EdgeInfo.getEdge_info().split(",");
         String RoadOrSideWalk = edge[0];
         if (RoadOrSideWalk.equals("0")) {
