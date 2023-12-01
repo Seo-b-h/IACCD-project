@@ -228,7 +228,7 @@
                     if (Road_OR_SideWalk === 0) return;
                     for (let i = 0; i < lineDraw.length; i++) {
                         if (polyline === lineDraw[i]) {
-                            isOneWay[i] = (isOneWay[i] + 1) % 3;
+                            isOneWay[i] = (isOneWay[i] + 1) % 2;
                             break;
                         }
                     }
