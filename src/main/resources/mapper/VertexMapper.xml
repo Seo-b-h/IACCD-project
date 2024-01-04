@@ -13,21 +13,21 @@
     <!-- parameterType : 객체의 프로퍼티값이 SQL문의 입력 파라미터에 지정 -->
 
     <insert id="SWSaveVertex" parameterType="Design.Idea.model.Vertex">
-        INSERT INTO sidewalkvertex_info(SWVertexLatitude, SWVertexLongitude, SWIsDestination)
+        INSERT INTO sidewalk_vertex(latitude, longitude, is_destination)
         VALUES (#{Lat}, #{Lng}, #{isDestination})
     </insert>
 
     <insert id="RSaveVertex" parameterType="Design.Idea.model.Vertex">
-        INSERT INTO roadvertex_info(RVertexLatitude, RVertexLongitude, RIsDestination)
+        INSERT INTO road_vertex(latitude, longitude, is_destination)
         VALUES (#{Lat}, #{Lng}, #{isDestination})
     </insert>
 
     <select id="SelectSWVertex" resultType="map">
-        SELECT * FROM sidewalkvertex_info
+        SELECT * FROM sidewalk_vertex
     </select>
 
     <select id="SelectRVertex" resultType="map">
-        SELECT * FROM roadvertex_info
+        SELECT * FROM road_vertex
     </select>
 
     <delete id="DeleteSWVertex" parameterType="Design.Idea.model.Vertex" statementType="CALLABLE">

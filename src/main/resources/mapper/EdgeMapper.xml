@@ -13,20 +13,20 @@
     <!-- parameterType : 객체의 프로퍼티값이 SQL문의 입력 파라미터에 지정 -->
 
     <select id="SWSaveEdge" parameterType="Design.Idea.model.Edge">
-        INSERT INTO sidewalkEdge_info(SWVertexID1, SWVertexID2, SWEdgeLength)
+        INSERT INTO sidewalk_edge(sidewalk_vertex_id1, sidewalk_vertex_id2, length)
         VALUES (#{V1}, #{V2}, #{edgeLength})
     </select>
 
     <select id="RSaveEdge" parameterType="Design.Idea.model.Edge">
-        INSERT INTO roadEdge_info(RVertexID1, RVertexID2, REdgeLength, IsOneWay)
+        INSERT INTO road_edge(road_vertex_id1, road_vertex_id2, length, one_way_type)
         VALUES (#{V1}, #{V2}, #{edgeLength}, #{isOneWay})
     </select>
 
     <select id="SelectSWEdge" resultType="map">
-        SELECT * FROM sidewalkedge_info
+        SELECT * FROM sidewalk_edge
     </select>
 
     <select id="SelectREdge" resultType="map">
-        SELECT * FROM roadedge_info
+        SELECT * FROM road_edge
     </select>
 </mapper>

@@ -44,7 +44,7 @@
     <button onclick="showEdges()">간선 보이기</button>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     도로/도보
-    <button id='changeRW' onclick="changeRW()">도보</button>
+    <button id='changeRW' onclick="changeRW()">도로</button>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <form name="saveVtx" action="/saveVertex" method="post">
 </form>
@@ -57,7 +57,8 @@
 <p><em>지도를 클릭해주세요!</em></p>
 <p id="result"></p>
 <div id="clickLatlng"></div>
-<script id="apikey" type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=36d7d56dffc065ea26aa515b442d5b6f"></script>
+<script id="apikey" type="text/javascript"
+        src="//dapi.kakao.com/v2/maps/sdk.js?appkey=36d7d56dffc065ea26aa515b442d5b6f"></script>
 <script type="text/javascript" src="/js/apikey.js"></script>
 <script>
     const MAP_API = config.apikey;
@@ -70,7 +71,7 @@
     var map = new kakao.maps.Map(container, options);
 
     /*정점, 간선 생성 시 도로에 대한 것인지 도보에 대한 것인지를 판단하는데 쓰인다.*/
-    let Road_OR_SideWalk = 0;
+    let Road_OR_SideWalk = 1;
 
     /*마커, 마커와 관련된 정보들을 저장하기 위해 사용되는 배열들이다.*/
     let markers = [];
@@ -100,17 +101,17 @@
             success: function (vertexInfo) {
                 if (Road_OR_SideWalk === 0) { // 0, 즉 도보일 때 그에 맞게 마커 추가.
                     for (let i = 0; i < vertexInfo.length; i++) {
-                        let lat = vertexInfo[i].SWVertexLatitude;
-                        let lng = vertexInfo[i].SWVertexLongitude;
-                        let isDestination = vertexInfo[i].SWIsDestination;
+                        let lat = vertexInfo[i].latitude;
+                        let lng = vertexInfo[i].longitude;
+                        let isDestination = vertexInfo[i].is_destination === undefined ? null : vertexInfo[i].is_destination;
                         let markerPosition = new kakao.maps.LatLng(lat, lng);
                         addMarker(markerPosition, isDestination);
                     }
                 } else { // 1, 즉 도로일 때 그에 맞게 마커 추가.
                     for (let i = 0; i < vertexInfo.length; i++) {
-                        let lat = vertexInfo[i].RVertexLatitude;
-                        let lng = vertexInfo[i].RVertexLongitude;
-                        let isDestination = vertexInfo[i].RIsDestination;
+                        let lat = vertexInfo[i].latitude;
+                        let lng = vertexInfo[i].longitude;
+                        let isDestination = vertexInfo[i].is_destination === undefined ? null : vertexInfo[i].is_destination;
                         let markerPosition = new kakao.maps.LatLng(lat, lng);
                         addMarker(markerPosition, isDestination);
                     }
@@ -132,17 +133,17 @@
             success: function (edgeInfo) {
                 if (Road_OR_SideWalk === 0) { // 0, 즉 도보일 때 그에 맞게 간선 추가.
                     for (let i = 0; i < edgeInfo.length; i++) {
-                        let v1 = edgeInfo[i].SWVertexID1 - 1;
-                        let v2 = edgeInfo[i].SWVertexID2 - 1;
+                        let v1 = edgeInfo[i].sidewalk_vertex_id1 - 1;
+                        let v2 = edgeInfo[i].sidewalk_vertex_id2 - 1;
                         //console.log(v1, v2);
                         tmpedges = [v1, v2];
-                        if(v1 > markers.length || v1 < 0 || v2 > markers.length || v2 < 0) console.log(v1, v2);
+                        if (v1 > markers.length || v1 < 0 || v2 > markers.length || v2 < 0) console.log(v1, v2);
                         EdgeControl(markers[v2], 0);
                     }
                 } else { // 1, 즉 도로일 때 그에 맞게 간선 추가.
                     for (let i = 0; i < edgeInfo.length; i++) {
-                        let v1 = edgeInfo[i].RVertexID1 - 1;
-                        let v2 = edgeInfo[i].RVertexID2 - 1;
+                        let v1 = edgeInfo[i].road_vertex_id1 - 1;
+                        let v2 = edgeInfo[i].road_vertex_id2 - 1;
                         let isOneWay = edgeInfo[i].IsOneWay;
                         tmpedges = [v1, v2];
                         EdgeControl(markers[v2], isOneWay);
@@ -176,10 +177,10 @@
     // 지도에 클릭 이벤트를 등록합니다.
     // 지도를 클릭하면 마지막 파라미터로 넘어온 함수를 호출합니다
     kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
-        addMarker(mouseEvent.latLng, 0);
+        addMarker(mouseEvent.latLng, null);
     });
 
-    /*웹페이지에서 정점을 추가하거나 삭제하는데 사용되는 함수이다.*/
+    /*웹페이지에서 간선을 추가하거나 삭제하는데 사용되는 함수이다.*/
     function EdgeControl(marker, isOW) {
         if (tmpedges[0] === -1) { // 마커 위에서 오른쪽 클릭이 한 번 수행 되었을 때 마커의 인덱스를 찾아 tmpedges[0]에 저장한다.
             let i = 0;
@@ -220,7 +221,7 @@
                 edgelength.push(polyline.getLength());
                 polyline.setMap(map);
                 lineDraw.push(polyline);
-                isOneWay.push(isOW); // 일방 통행 여부는 0, 즉 양방향 통행인 것으로 설정한다 1은 정점 1에서 정점 2, 2는 정점 2에서 정점 1방향으로 일방통행인 것으로 생각한다.
+                isOneWay.push(isOW === 'YES' ? 'YES' : 'NO'); // 일방 통행 여부는 0, 즉 양방향 통행인 것으로 설정한다 1은 정점 1에서 정점 2, 2는 정점 2에서 정점 1방향으로 일방통행인 것으로 생각한다.
 
                 /*선 클릭 이벤트를 등록. 클릭을 하면 일방 통행 여부가 바뀐다.*/
                 kakao.maps.event.addListener(polyline, 'click', function () {
@@ -228,7 +229,9 @@
                     if (Road_OR_SideWalk === 0) return;
                     for (let i = 0; i < lineDraw.length; i++) {
                         if (polyline === lineDraw[i]) {
-                            isOneWay[i] = (isOneWay[i] + 1) % 2;
+                            if(isOneWay[i] === 'YES') isOneWay[i] = 'NO';
+                            else isOneWay[i] = 'YES';
+                            //isOneWay[i] = (isOneWay[i] + 1) % 2;
                             break;
                         }
                     }
@@ -261,6 +264,8 @@
         /*아래 네 줄은 인포 윈도우를 생성하기 위해 사용된다. 마커 위에 마우스를 가져다대면 마커의 인덱스가 표시된다.*/
         let markersLength = document.createElement('div');
         markersLength.textContent = "VertexID:" + markers.length.toString() + ", isEnd:0";
+        markersLength.style.width = "100%";
+        markersLength.style.padding="5px";
         let iwContent = markersLength;// 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
         marker.infowindow = new kakao.maps.InfoWindow({content: iwContent}); // 인포윈도우를 생성합니다
 
@@ -280,7 +285,8 @@
         kakao.maps.event.addListener(marker, 'click', function () {
             for (let i = 0; i < markers.length; i++) {
                 if (marker === markers[i]) {
-                    isDestinations[i] = (isDestinations[i] + 1) % 2;
+                    if (isDestinations[i] === null) isDestinations[i] = (i + 1).toString();
+                    else isDestinations[i] = null;
                     marker.infowindow.close();
                     break;
                 }
@@ -296,7 +302,7 @@
         /*마커에 오른쪽 클릭 이벤트를 등록한다. 두 개의 마커에 오른쪽 클릭을 하면 선, 선과 관련된 정보들이
         생성되고, 다시 동일한 두 개의 마커를 오른쪽 클릭하면 선, 선과 관련된 정보들이 삭제된다.*/
         kakao.maps.event.addListener(marker, 'rightclick', function () {
-            EdgeControl(marker, 0);
+            EdgeControl(marker, 'YES');
             marker.infowindow.close();
             setMarkers(map);
         });
@@ -341,15 +347,15 @@
 
                     /*마커, 마커와 관련된 정보 삭제*/
                     let vertexInfo = "";
-                    if(Road_OR_SideWalk === 0) vertexInfo += "0,";
+                    if (Road_OR_SideWalk === 0) vertexInfo += "0,";
                     else vertexInfo += "1,"
-                    vertexInfo += (i + 1).toString() + "," + positions[i].getLat().toString() + "," + positions[i].getLng().toString() + "," + isDestinations[i].toString();
+                    vertexInfo += (i + 1).toString() + "," + positions[i].getLat().toString() + "," + positions[i].getLng().toString() + "," + String(isDestinations[i]);
                     positions.splice(i, 1);
                     markers.splice(i, 1);
                     isDestinations.splice(i, 1);
                     marker.infowindow.close();
                     console.log(vertexFromDB, i);
-                    if(vertexFromDB > i) deleteVertexAtDB(vertexInfo); // DB에 저장되어 있는 정점일 시 DB에서 정점 정보 삭제
+                    if (vertexFromDB > i) deleteVertexAtDB(vertexInfo); // DB에 저장되어 있는 정점일 시 DB에서 정점 정보 삭제
                     break;
                 }
             }
@@ -362,13 +368,15 @@
     /*지도에 마커들을 표시하는 함수이다.*/
     function setMarkers(map) {
         let message = "";
-        if (Road_OR_SideWalk === 0) message += "SWVertexLatitude, SWVertexLongitude, SWIsDestination<br>";
-        else message += "RVertexLatitude, RVertexLongitude, RIsDestination<br>";
+        if (Road_OR_SideWalk === 0) message += "sidewalk_vertex_latitude, sidewalk_vertex_longitude, sidewalk_is_destination<br>";
+        else message += "road_vertex_latitude, road_vertex_longitude, road_is_destination<br>";
         /*정점에 대한 정보를 화면에 띄우기 위해 문자열을 생성한다.*/
         for (let i = 0; i < markers.length; i++) {
             /*아래 네 줄은 인포 윈도우를 생성하기 위해 사용된다. 마커 위에 마우스를 가져다대면 마커의 인덱스가 표시된다.*/
             let markersLength = document.createElement('div');
-            markersLength.textContent = "VertexID:" + i.toString() + ", isEnd:" + isDestinations[i].toString();
+            markersLength.textContent = "VertexID:" + i.toString() + ", isEnd:" + isDestinations[i];
+            markersLength.style.width="100%";
+            markersLength.style.padding="5px";
             let iwContent = markersLength;// 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
             markers[i].infowindow = new kakao.maps.InfoWindow({content: iwContent}); // 인포윈도우를 생성합니다
 
@@ -379,8 +387,8 @@
         }
 
         /*간선에 대한 정보를 화면에 띄우기 위해 문자열을 생성한다.*/
-        if (Road_OR_SideWalk === 0) message += '<br><br>SWVertexID1, SWVertexID2, SWEdgeLength<br>';
-        else message += '<br><br>RVertexID1, RVertexID2, REdgeLength, IsOneWay<br>';
+        if (Road_OR_SideWalk === 0) message += '<br><br>sidewalk_vertex_id1, sidewalk_vertex_id2, length<br>';
+        else message += '<br><br>road_vertex_id1, road_vertex_id2, length, one_way_type<br>';
         for (let i = 0; i < edges.length; i++) {
             /*i번째 간선을 이루는 정점 두 개, 간선의 길이를 message 뒤에 붙인다.*/
             if (Road_OR_SideWalk === 0) message += edges[i][0] + ', ' + edges[i][1] + ', \"' + edgelength[i] + '\"<br>';
@@ -398,7 +406,7 @@
         if (Road_OR_SideWalk === 0) message = "0,";
         else message = "1,";
         for (let i = vertexFromDB; i < positions.length; i++) { // 이미 DB에 저장되어 있는 것들은 다시 DB에 추가하지 않는다.
-            message += (i + 1).toString() + "," + positions[i].getLat().toString() + "," + positions[i].getLng().toString() + "," + isDestinations[i].toString();
+            message += (i + 1).toString() + "," + positions[i].getLat().toString() + "," + positions[i].getLng().toString() + "," + String(isDestinations[i]);
             if (i !== positions.length - 1) message += ",";
         }
 
@@ -413,7 +421,7 @@
         });
     }
 
-    /*간선 저장 버튼이 눌리면 웹페이지에 새로 찍은 정점들을 DB에 저장하는 함수이다.*/
+    /*간선 저장 버튼이 눌리면 웹페이지에 새로 찍은 간선들을 DB에 저장하는 함수이다.*/
     function saveEdge() {
         let message;
         if (Road_OR_SideWalk === 0) message = "0,";
@@ -421,7 +429,7 @@
         for (let i = edgeFromDB; i < edges.length; i++) { // 이미 DB에 저장되어 있는 것들은 다시 DB에 추가하지 않는다.
             if (Road_OR_SideWalk === 0) message += edges[i][0].toString() + "," + edges[i][1].toString() + "," + edgelength[i].toString();
             else message += edges[i][0].toString() + "," + edges[i][1].toString() + "," + edgelength[i].toString() + "," + isOneWay[i].toString();
-            if (i !== positions.length - 1) message += ",";
+            if (i !== edges.length - 1) message += ",";
         }
 
         /*form의 value에 문자열 형식으로 합쳐진 정보를 포스트 형식으로 컨트롤러 측에 보낸다.*/

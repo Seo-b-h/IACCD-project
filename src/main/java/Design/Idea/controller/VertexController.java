@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Controller
 @RequiredArgsConstructor
@@ -27,12 +28,12 @@ public class VertexController {
         String RoadOrSideWalk = vertex[0];
         if(RoadOrSideWalk.equals("0")) {
             for (int i = 1; i < vertex.length; i += 4) {
-                vertexService.SWSaveVertex(new Vertex(vertex[i], vertex[i + 1], vertex[i + 2], vertex[i+3]));
+                vertexService.SWSaveVertex(new Vertex(vertex[i], vertex[i + 1], vertex[i + 2], Objects.equals(vertex[i + 3], "null") ? null : vertex[i+3]));
             }
         }
         else {
             for (int i = 1; i < vertex.length; i += 4) {
-                vertexService.RSaveVertex(new Vertex(vertex[i], vertex[i + 1], vertex[i + 2], vertex[i+3]));
+                vertexService.RSaveVertex(new Vertex(vertex[i], vertex[i + 1], vertex[i + 2], Objects.equals(vertex[i + 3], "null") ? null : vertex[i+3]));
             }
         }
         return "redirect:/map";
@@ -43,7 +44,7 @@ public class VertexController {
     /*DB에 저장되어 있는 정점 정보들을 가져와 웹페이지로 반환한다.*/
     public List<Map<String, Object>> selectVertex(@RequestParam("ROS") String Road_OR_SideWalk) throws Exception {
         if(Road_OR_SideWalk.equals("0")) {
-            //logger.info("selectSWVertex log {}", vertexInfo);
+            //logger.info("selectSWVertex log {}", vertexService.SelectSWVertex());
             return vertexService.SelectSWVertex();
         }
         else {

@@ -43,11 +43,11 @@ public class EdgeController {
     /*DB에 저장되어 있는 간선 정보들을 가져와 웹페이지로 반환한다.*/
     public List<Map<String, Object>> selectEdge(@RequestParam("ROS") String Road_OR_SideWalk) throws Exception {
         if(Road_OR_SideWalk.equals("0")) {
-            //logger.info("selectSWVertex log {}", saveEdgeService.SelectSWEdge());
+            //logger.info("selectSWEdge log {}", edgeService.SelectSWEdge());
             return edgeService.SelectSWEdge();
         }
         else {
-            //logger.info("selectRVertex log {}", saveEdgeService.SelectREdge());
+            //logger.info("selectREdge log {}", saveEdgeService.SelectREdge());
             return edgeService.SelectREdge();
         }
     }
