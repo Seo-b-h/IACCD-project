@@ -136,17 +136,22 @@
                         let v1 = edgeInfo[i].sidewalk_vertex_id1 - 1;
                         let v2 = edgeInfo[i].sidewalk_vertex_id2 - 1;
                         //console.log(v1, v2);
+                        let isTrue = 0
+                        for (let i = edges.length - 1; i >= 0; i--) {
+
+                        }
                         tmpedges = [v1, v2];
                         if (v1 > markers.length || v1 < 0 || v2 > markers.length || v2 < 0) console.log(v1, v2);
-                        EdgeControl(markers[v2], 0);
+                        EdgeControl(markers[v2], 0, 1);
                     }
                 } else { // 1, 즉 도로일 때 그에 맞게 간선 추가.
                     for (let i = 0; i < edgeInfo.length; i++) {
                         let v1 = edgeInfo[i].road_vertex_id1 - 1;
                         let v2 = edgeInfo[i].road_vertex_id2 - 1;
-                        let isOneWay = edgeInfo[i].IsOneWay;
+                        let isOneWay = edgeInfo[i].one_way_type;
+                        //console.log(isOneWay);
                         tmpedges = [v1, v2];
-                        EdgeControl(markers[v2], isOneWay);
+                        EdgeControl(markers[v2], isOneWay, 1);
                     }
                 }
                 edgeFromDB = edgeInfo.length;
@@ -181,7 +186,7 @@
     });
 
     /*웹페이지에서 간선을 추가하거나 삭제하는데 사용되는 함수이다.*/
-    function EdgeControl(marker, isOW) {
+    function EdgeControl(marker, isOW, isInit) {
         if (tmpedges[0] === -1) { // 마커 위에서 오른쪽 클릭이 한 번 수행 되었을 때 마커의 인덱스를 찾아 tmpedges[0]에 저장한다.
             let i = 0;
             for (; i < markers.length; i++) if (marker === markers[i]) break;
@@ -194,12 +199,14 @@
             let isTrue = 1, idx = 0;
 
             /*간선 배열을 돌며 두 개의 마커 인덱스가 간선 배열에 들어가 있다면 해당 간선을 삭제하기 위해 isTrue를 0으로 설정한다.*/
-            for (let j = 0; j < edges.length; j++) {
-                if ((edges[j][0] === tmpedges[0] && edges[j][1] === tmpedges[1]) || (edges[j][0] === tmpedges[1] && edges[j][1] === tmpedges[0])) {
-                    console.log(edges[j][0], edges[j][1]);
-                    idx = j;
-                    isTrue = 0;
-                    break;
+            if (!isInit) {
+                for (let j = 0; j < edges.length; j++) {
+                    if ((edges[j][0] === tmpedges[0] && edges[j][1] === tmpedges[1]) || (edges[j][0] === tmpedges[1] && edges[j][1] === tmpedges[0])) {
+                        console.log(edges[j][0], edges[j][1]);
+                        idx = j;
+                        isTrue = 0;
+                        break;
+                    }
                 }
             }
             if (isTrue) { // isTrue가 1이면 간선을 생성한다.
@@ -229,7 +236,7 @@
                     if (Road_OR_SideWalk === 0) return;
                     for (let i = 0; i < lineDraw.length; i++) {
                         if (polyline === lineDraw[i]) {
-                            if(isOneWay[i] === 'YES') isOneWay[i] = 'NO';
+                            if (isOneWay[i] === 'YES') isOneWay[i] = 'NO';
                             else isOneWay[i] = 'YES';
                             //isOneWay[i] = (isOneWay[i] + 1) % 2;
                             break;
@@ -265,7 +272,7 @@
         let markersLength = document.createElement('div');
         markersLength.textContent = "VertexID:" + markers.length.toString() + ", isEnd:0";
         markersLength.style.width = "100%";
-        markersLength.style.padding="5px";
+        markersLength.style.padding = "5px";
         let iwContent = markersLength;// 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
         marker.infowindow = new kakao.maps.InfoWindow({content: iwContent}); // 인포윈도우를 생성합니다
 
@@ -302,7 +309,7 @@
         /*마커에 오른쪽 클릭 이벤트를 등록한다. 두 개의 마커에 오른쪽 클릭을 하면 선, 선과 관련된 정보들이
         생성되고, 다시 동일한 두 개의 마커를 오른쪽 클릭하면 선, 선과 관련된 정보들이 삭제된다.*/
         kakao.maps.event.addListener(marker, 'rightclick', function () {
-            EdgeControl(marker, 'YES');
+            EdgeControl(marker, 'NO', 0);
             marker.infowindow.close();
             setMarkers(map);
         });
@@ -375,8 +382,8 @@
             /*아래 네 줄은 인포 윈도우를 생성하기 위해 사용된다. 마커 위에 마우스를 가져다대면 마커의 인덱스가 표시된다.*/
             let markersLength = document.createElement('div');
             markersLength.textContent = "VertexID:" + i.toString() + ", isEnd:" + isDestinations[i];
-            markersLength.style.width="100%";
-            markersLength.style.padding="5px";
+            markersLength.style.width = "100%";
+            markersLength.style.padding = "5px";
             let iwContent = markersLength;// 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
             markers[i].infowindow = new kakao.maps.InfoWindow({content: iwContent}); // 인포윈도우를 생성합니다
 

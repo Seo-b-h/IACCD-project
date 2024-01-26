@@ -22,16 +22,18 @@ public class EdgeController {
     @PostMapping("/saveEdge")
     /*여러 개의 간선 정보들을 문자열 형태로 전달받아 DB에 저장한다.*/
     public String saveEdge(EdgeInfo EdgeInfo) throws Exception {
-        //logger.info("trace log={}", EdgeInfo.getEdge_info());
         String[] edge = EdgeInfo.getEdge_info().split(",");
         String RoadOrSideWalk = edge[0];
         if (RoadOrSideWalk.equals("0")) {
             for (int i = 1; i < edge.length; i += 3) {
                 edgeService.SWSaveEdge(new Edge(Integer.parseInt(edge[i]) + 1, Integer.parseInt(edge[i + 1]) + 1, edge[i + 2]));
+                edgeService.SWSaveEdge(new Edge(Integer.parseInt(edge[i + 1]) + 1, Integer.parseInt(edge[i]) + 1, edge[i + 2]));
             }
         } else {
             for (int i = 1; i < edge.length; i += 4) {
+                //logger.info("trace log={}", EdgeInfo.getEdge_info());
                 edgeService.RSaveEdge(new Edge(Integer.parseInt(edge[i]) + 1, Integer.parseInt(edge[i + 1]) + 1, edge[i + 2], edge[i + 3]));
+                if(edge[i+3].equals("NO"))edgeService.RSaveEdge(new Edge(Integer.parseInt(edge[i + 1]) + 1, Integer.parseInt(edge[i]) + 1, edge[i + 2], edge[i + 3]));
             }
         }
         /*return "edgemap";*/
@@ -42,12 +44,11 @@ public class EdgeController {
     @ResponseBody
     /*DB에 저장되어 있는 간선 정보들을 가져와 웹페이지로 반환한다.*/
     public List<Map<String, Object>> selectEdge(@RequestParam("ROS") String Road_OR_SideWalk) throws Exception {
-        if(Road_OR_SideWalk.equals("0")) {
+        if (Road_OR_SideWalk.equals("0")) {
             //logger.info("selectSWEdge log {}", edgeService.SelectSWEdge());
             return edgeService.SelectSWEdge();
-        }
-        else {
-            //logger.info("selectREdge log {}", saveEdgeService.SelectREdge());
+        } else {
+            //logger.info("selectREdge log {}", edgeService.SelectREdge());
             return edgeService.SelectREdge();
         }
     }
