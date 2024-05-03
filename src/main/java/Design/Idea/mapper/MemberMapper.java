@@ -1,4 +1,4 @@
-package Design.Idea.mapper;
-
-public class MemberMapper {
-}
+//package Design.Idea.mapper;
+//
+//public class MemberMapper {
+//}

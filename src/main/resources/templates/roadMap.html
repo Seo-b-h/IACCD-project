@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <title>Kakao 지도 도로 정점, 간선 편집 도구</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css" integrity="sha384-
+ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+          crossorigin="anonymous">
+    <!-- Custom styles for this template -->
+    <link href="/css/jumbotron-narrow.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/map.css">
+</head>
+<body>
+<div id="map"></div>
+
+<section id="serviceDescriptionSection">
+    <p class="m-0">정점 추가: 지도에서 마우스 왼쪽 클릭</p>
+    <p class="m-0">정점에 정보 입력: 정점에서 마우스 왼쪽 0.3초 이상 눌렀다 떼기</p>
+    <p class="m-0">정점 삭제: 정점 마우스 왼쪽 클릭(정점과 연관된 간선들도 자동으로 삭제됨)</p>
+    <p class="m-0">간선 추가: 서로 다른 두 개의 정점을 각각 마우스 오른쪽 클릭</p>
+    <p class="m-0">간선 삭제: 이미 간선으로 이어진 두 개의 정점을 각각 마우스 오른쪽 클릭</p>
+    <p class="m-0">일방통행 여부: 간선에서 마우스 왼쪽 클릭</p>
+</section>
+
+<section id="objectInfoModalSection">
+    <div class="modal fade" id="objectFormModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">오브젝트 정보 편집</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3" style="display: none;">
+                            <label for="id" class="col-form-label">아이디:</label>
+                            <input type="text" class="form-control" id="id">
+                        </div>
+                        <div class="mb-3">
+                            <label for="name" class="col-form-label">이름:</label>
+                            <input type="text" class="form-control" id="name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="col-form-label">설명:</label>
+                            <input class="form-control" id="description">
+                        </div>
+                        <div class="mb-3">
+                            <label for="objectType" class="col-form-label">종류:</label>
+                            <select id="objectType" class="form-select">
+                                <option selected value="BUILDING">빌딩</option>
+                                <option value="LANDMARK">랜드마크</option>
+                                <option value="BENCH">벤치</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="existingAddress" class="col-form-label">기존 주소 사용:</label>
+                            <select id="existingAddress" class="form-select">
+                                <option selected value="null">없음</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newAddress" class="col-form-label">새 주소 사용:</label>
+                            <input class="form-control" id="newAddress">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <small>저장 후 X나 페이지의 여백을 클릭하면 나갈 수 있습니다.</small>
+                    <div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button id="submitObjectsForm" type="button" class="btn btn-primary">저장</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<a href="/sidewalkMap" class="btn btn-outline-primary p-2">도보 정점, 간선 편집</a>
+<script src="https://code.jquery.com/jquery-3.7.1.slim.js"
+        integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc="
+        crossorigin="anonymous"></script>
+<script type="text/javascript" src="/js/bootstrap.bundle.js"></script>
+<script id="apikey" type="text/javascript"
+        src="//dapi.kakao.com/v2/maps/sdk.js?appkey=36d7d56dffc065ea26aa515b442d5b6f"></script>
+<!-- services와 clusterer, drawing 라이브러리 불러오기 -->
+<script type="text/javascript"
+        src="//dapi.kakao.com/v2/maps/sdk.js?appkey=36d7d56dffc065ea26aa515b442d5b6f&libraries=services,clusterer,drawing"></script>
+<script type="text/javascript" src="/js/apikey.js"></script>
+<script type="text/javascript" src="/js/objects.js"></script>
+<script type="text/javascript" src="/js/marker.js"></script>
+<script type="text/javascript" src="/js/polyLine.js"></script>
+<script type="text/javascript" src="/js/map.js"></script>
+</body>
+</html>
