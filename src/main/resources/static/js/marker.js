@@ -52,6 +52,11 @@ let vertexMouseDownBegin, vertexMouseDownEnd, vertexMouseOver;
 function vertexAddEventListener(marker, isNormalVertex) {
     kakao.maps.event.addListener(marker, 'mouseover', function () {
         //console.log("mouse over!");
+        /*for (let i = 0; i < markers.length; i++) // 정점 아이디 찾을 때 사용.
+            if (marker === markers[i]) {
+                console.log("marker id: " + (i + 1).toString());
+                break;
+            }*/
         vertexMouseOver = 1;
         if (isNormalVertex) marker.setRadius(3);
     });
@@ -180,7 +185,7 @@ function edgeControl(marker) {
             if (marker === markers[i]) {
                 let isDelete = 0;
                 vertexForEdge[1] = i;
-                if(vertexForEdge[0]===vertexForEdge[1]) {
+                if (vertexForEdge[0] === vertexForEdge[1]) {
                     vertexForEdge = [-1, -1];
                     return;
                 }

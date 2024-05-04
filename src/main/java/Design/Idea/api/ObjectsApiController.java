@@ -47,7 +47,8 @@ public class ObjectsApiController {
     public Long addNewObject(@RequestBody @Valid ObjectVCRequest form) {
         logger.info("{}", form);
         Long addressId, RId = form.getRoadVertexId(), SWId = form.getSidewalkVertexId();
-        if (form.getExistingAddressId() != null) addressId = form.getExistingAddressId();
+        if (form.getExistingAddressId() == null && form.getNewAddress().isEmpty()) addressId = null;
+        else if (form.getExistingAddressId() != null) addressId = form.getExistingAddressId();
         else addressId = objectAddressService.save(form.getNewAddress()).getId();
 
         if (form.getSidewalkVertexId() == null) SWId = sidewalkVertexService.save(form.getLatitude(), form.getLongitude()).getId();

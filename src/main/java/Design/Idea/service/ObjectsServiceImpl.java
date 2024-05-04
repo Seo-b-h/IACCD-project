@@ -36,7 +36,7 @@ public class ObjectsServiceImpl implements ObjectsService {
         logger.info("Save object, name: {}", name);
         SidewalkVertex sidewalkVertex = sidewalkVertexRepository.findById(SWId);
         RoadVertex roadVertex = roadVertexRepository.findById(RId);
-        Objects objects = Objects.createObjects(name, description, objectType, objectAddressRepository.findById(addressId));
+        Objects objects = Objects.createObjects(name, description, objectType, addressId == null ? null : objectAddressRepository.findById(addressId));
 
         roadVertex.changeObjects(objects);
         sidewalkVertex.changeObjects(objects);
@@ -54,7 +54,7 @@ public class ObjectsServiceImpl implements ObjectsService {
         objects.changeName(name);
         objects.changeDescription(description);
         objects.changeObjectType(objectType);
-        objects.changeObjectAddress(objectAddressRepository.findById(addressId));
+        objects.changeObjectAddress(addressId == null ? null : objectAddressRepository.findById(addressId));
         roadVertex.changeObjects(objects);
         sidewalkVertex.changeObjects(objects);
         return objects;
