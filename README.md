@@ -5,7 +5,7 @@
 - 해당 프로젝트를 실행시키기 위해
   1. mysql에서 '0_길찾기서비스테이블_쿼리문(2024_0520_1845).txt'의 쿼리문을 실행하여 map database를 만듭니다.
   2. application.yml 파일을 추가하여 다음과 같이 작성합니다.
- 
+ ```
   spring:
     datasource:
       url: jdbc:mysql://localhost:3306/map?serverTimezone=UTC&characterEncoding=UTF-8
@@ -40,7 +40,7 @@
 
   api-key:
     kakao-map-api: //dapi.kakao.com/v2/maps/sdk.js?appkey={카카오 맵 API javascript 키 값}
-
+```
   3. '{mysql username}'을 지우고 mysql에서 사용하는 username을 입력합니다.
   4. '{mysql password}'을 지우고 mysql에서 사용하는 password를 입력합니다.
   5. '{카카오 맵 API javascript 키 값}'을 지우고 카카오 맵 api에서 발급받은 javascript 키 값을 입력합니다.
