@@ -63,8 +63,8 @@ api-key:
   - 튜플에 한글이 포함된 경우 csv 파일로 만들면 한글이 깨질 수 있으므로 json 확장자를 사용하는 것을 권장합니다.
   - 튜플에 한글이 포함되지 않은 경우 json 파일로 만들면 깨질 수 있으므로 csv 확장자를 사용하는 것을 권장합니다.
   - 튜플에 한글과 null이 포함되어 있는 경우 추출한 파일을 다시 import할 때 오류가 발생할 수 있습니다. 따라서 이때는 쿼리문을 이용해 null이 포함된 행을 골라 null이 들어간 속성을 제거하여 json 파일로 추출, null이 포함되지 않은 행만 json 파일로 추출하여 사용하는 것을 권장합니다.
-    -쿼리문 예시 
-      ![image](https://github.com/Seo-b-h/IACCD-project/assets/123562354/8df74269-beea-41d3-a9d0-b9f1daa98669)
-      ![image](https://github.com/Seo-b-h/IACCD-project/assets/123562354/22764bd2-9205-4fb1-9f5a-63e71cc6b945)
+    - 쿼리문 예시 
+![image](https://github.com/Seo-b-h/IACCD-project/assets/123562354/8df74269-beea-41d3-a9d0-b9f1daa98669)
+![image](https://github.com/Seo-b-h/IACCD-project/assets/123562354/22764bd2-9205-4fb1-9f5a-63e71cc6b945)
 
 
