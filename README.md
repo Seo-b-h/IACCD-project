@@ -6,40 +6,40 @@
   1. mysql에서 '0_길찾기서비스테이블_쿼리문(2024_0520_1845).txt'의 쿼리문을 실행하여 map database를 만듭니다.
   2. application.yml 파일을 추가하여 다음과 같이 작성합니다.
  ```
-  spring:
-    datasource:
-      url: jdbc:mysql://localhost:3306/map?serverTimezone=UTC&characterEncoding=UTF-8
-      username: {mysql username}
-      password: {mysql password}
-      driver-class-name: com.mysql.cj.jdbc.Driver
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/map?serverTimezone=UTC&characterEncoding=UTF-8
+    username: {mysql username}
+    password: {mysql password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
-    messages:
-      basename: messages
+  messages:
+    basename: messages
 
-    jpa:
+  jpa:
+    hibernate:
+      #ddl=auto: create
+      ddl-auto: none
+
+    properties:
       hibernate:
-        #ddl=auto: create
-        ddl-auto: none
+        format_sql: true
 
-      properties:
-        hibernate:
-          format_sql: true
+  thymeleaf:
+    cache: false
 
-    thymeleaf:
-      cache: false
+logging:
+  level:
+    #root: warn
+    org.hibernate.SQL: debug
 
-  logging:
-    level:
-      #root: warn
-      org.hibernate.SQL: debug
+#server:
+#  servlet:
+#    session:
+#      tracking-modes: cookie
 
-  #server:
-  #  servlet:
-  #    session:
-  #      tracking-modes: cookie
-
-  api-key:
-    kakao-map-api: //dapi.kakao.com/v2/maps/sdk.js?appkey={카카오 맵 API javascript 키 값}
+api-key:
+  kakao-map-api: //dapi.kakao.com/v2/maps/sdk.js?appkey={카카오 맵 API javascript 키 값}
 ```
   3. '{mysql username}'을 지우고 mysql에서 사용하는 username을 입력합니다.
   4. '{mysql password}'을 지우고 mysql에서 사용하는 password를 입력합니다.
