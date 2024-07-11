@@ -1,0 +1,252 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+-- Schema map
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema map
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `map` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci ;
+USE `map` ;
+
+-- -----------------------------------------------------
+-- Table `map`.`checks`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `map`.`checks` (
+  `dormant` TINYINT(1) NOT NULL,
+  `email_auth` TINYINT(1) NOT NULL,
+  `information_agree` TINYINT(1) NOT NULL,
+  `check_id` BIGINT NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`check_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `map`.`log`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `map`.`log` (
+  `log_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `log_time` DATETIME(6) NOT NULL,
+  `content` VARCHAR(100) NOT NULL,
+  `device_type` ENUM('COMPUTER', 'PHONE', 'TABLET') NOT NULL,
+  `log_level` ENUM('TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR') NOT NULL,
+  PRIMARY KEY (`log_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `map`.`member`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `map`.`member` (
+  `join_date` DATE NOT NULL,
+  `last_connect` DATE NOT NULL,
+  `check_id` BIGINT NULL DEFAULT NULL,
+  `member_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `nickname` VARCHAR(12) NOT NULL,
+  `user_id` VARCHAR(12) NOT NULL,
+  `password` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`member_id`),
+  UNIQUE INDEX `UK_hh9kg6jti4n1eoiertn2k6qsc` (`nickname` ASC) VISIBLE,
+  UNIQUE INDEX `UK_a9bw6sk85ykh4bacjpu0ju5f6` (`user_id` ASC) VISIBLE,
+  UNIQUE INDEX `UK_mbmcqelty0fbrvxp1q58dn57t` (`email` ASC) VISIBLE,
+  UNIQUE INDEX `UK_rfm39oy7rrod9k2hg53wuybod` (`check_id` ASC) VISIBLE,
+  CONSTRAINT `FKnue6uuiwwjun047ieededxofq`
+    FOREIGN KEY (`check_id`)
+    REFERENCES `map`.`checks` (`check_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `map`.`object_address`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `map`.`object_address` (
+  `address_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `address` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`address_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `map`.`objects`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `map`.`objects` (
+  `object_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NOT NULL,
+  `description` VARCHAR(1000) NULL DEFAULT NULL,
+  `object_type` ENUM('BUILDING', 'LANDMARK', 'BENCH', 'BUILDING_ENTRANCE') NOT NULL,
+  `address_id` BIGINT NULL DEFAULT NULL,
+  PRIMARY KEY (`object_id`),
+  INDEX `FK3534cc6jpxteqnxtn6su5s2pt` (`address_id` ASC) VISIBLE,
+  CONSTRAINT `FK3534cc6jpxteqnxtn6su5s2pt`
+    FOREIGN KEY (`address_id`)
+    REFERENCES `map`.`object_address` (`address_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `map`.`road_vertex`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `map`.`road_vertex` (
+  `road_vertex_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `latitude` DOUBLE NOT NULL,
+  `longitude` DOUBLE NOT NULL,
+  `is_destination` BIGINT NULL DEFAULT NULL,
+  PRIMARY KEY (`road_vertex_id`),
+  UNIQUE INDEX `UK_2v2xh4lnjfae2an4s982lfaad` (`is_destination` ASC) VISIBLE,
+  CONSTRAINT `object_r_vertex_foreign_key`
+    FOREIGN KEY (`is_destination`)
+    REFERENCES `map`.`objects` (`object_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `map`.`road_edge`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `map`.`road_edge` (
+  `road_edge_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `road_vertex_id1` BIGINT NOT NULL,
+  `road_vertex_id2` BIGINT NOT NULL,
+  `length` DOUBLE NOT NULL,
+  PRIMARY KEY (`road_edge_id`),
+  INDEX `r_vertex1_r_edge_foreign_key` (`road_vertex_id1` ASC) VISIBLE,
+  INDEX `r_vertex2_r_edge_foreign_key` (`road_vertex_id2` ASC) VISIBLE,
+  CONSTRAINT `r_vertex1_r_edge_foreign_key`
+    FOREIGN KEY (`road_vertex_id1`)
+    REFERENCES `map`.`road_vertex` (`road_vertex_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `r_vertex2_r_edge_foreign_key`
+    FOREIGN KEY (`road_vertex_id2`)
+    REFERENCES `map`.`road_vertex` (`road_vertex_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `map`.`sidewalk_vertex`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `map`.`sidewalk_vertex` (
+  `sidewalk_vertex_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `latitude` DOUBLE NOT NULL,
+  `longitude` DOUBLE NOT NULL,
+  `is_destination` BIGINT NULL DEFAULT NULL,
+  PRIMARY KEY (`sidewalk_vertex_id`),
+  UNIQUE INDEX `UK_bt1qhqpmd3de4u29itmknmb9n` (`is_destination` ASC) VISIBLE,
+  CONSTRAINT `object_sw_vertex_foreign_key`
+    FOREIGN KEY (`is_destination`)
+    REFERENCES `map`.`objects` (`object_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `map`.`sidewalk_edge`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `map`.`sidewalk_edge` (
+  `sidewalk_edge_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `sidewalk_vertex_id1` BIGINT NOT NULL,
+  `sidewalk_vertex_id2` BIGINT NOT NULL,
+  `length` DOUBLE NOT NULL,
+  PRIMARY KEY (`sidewalk_edge_id`),
+  INDEX `sw_vertex1_sw_edge_foreign_key` (`sidewalk_vertex_id1` ASC) VISIBLE,
+  INDEX `sw_vertex2_sw_edge_foreign_key` (`sidewalk_vertex_id2` ASC) VISIBLE,
+  CONSTRAINT `sw_vertex2_sw_edge_foreign_key`
+    FOREIGN KEY (`sidewalk_vertex_id2`)
+    REFERENCES `map`.`sidewalk_vertex` (`sidewalk_vertex_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `sw_vertex1_sw_edge_foreign_key`
+    FOREIGN KEY (`sidewalk_vertex_id1`)
+    REFERENCES `map`.`sidewalk_vertex` (`sidewalk_vertex_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `map`.`transportation_speed_info`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `map`.`transportation_speed_info` (
+  `transportation_speed_info_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `speed` INT NOT NULL,
+  PRIMARY KEY (`transportation_speed_info_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- PROCEDURE SWVTX_DEL_PROCEDURE
+-- -----------------------------------------------------
+DROP PROCEDURE IF EXISTS SWVTX_DEL_PROCEDURE;
+DELIMITER $$
+CREATE PROCEDURE SWVTX_DEL_PROCEDURE(IN ID INT)
+BEGIN
+	DELETE FROM sidewalk_vertex WHERE sidewalk_vertex_id = ID;
+    DELETE FROM sidewalk_edge WHERE sidewalk_vertex_id1 = ID OR sidewalk_vertex_id2 = ID;
+    SET @COUNT = 0;
+    UPDATE sidewalk_vertex SET sidewalk_vertex_id = @COUNT := @COUNT + 1;
+    -- SET @COUNT = (SELECT MAX(SWVertexID) + 1 FROM sidewalkvertex_info);
+    SET @sql = CONCAT('ALTER TABLE `sidewalk_vertex` AUTO_INCREMENT = ', @COUNT);
+    PREPARE st FROM @sql;
+    EXECUTE st;
+END $$
+DELIMITER ;
+
+
+-- -----------------------------------------------------
+-- PROCEDURE RVTX_DEL_PROCEDURE
+-- -----------------------------------------------------
+DROP PROCEDURE IF EXISTS RVTX_DEL_PROCEDURE;
+DELIMITER $$
+CREATE PROCEDURE RVTX_DEL_PROCEDURE(IN ID INT)
+BEGIN
+	DELETE FROM road_vertex WHERE road_vertex_id = ID;
+    DELETE FROM road_edge WHERE road_vertex_id1 = ID OR road_vertex_id2 = ID;
+    SET @COUNT = 0;
+    UPDATE road_vertex SET road_vertex_id = @COUNT := @COUNT + 1;
+	-- SET @COUNT = (SELECT MAX(SWVertexID) + 1 FROM sidewalkvertex_info);
+    SET @sql = CONCAT('ALTER TABLE `road_vertex` AUTO_INCREMENT = ', @COUNT);
+    PREPARE st FROM @sql;
+    EXECUTE st;
+END $$
+DELIMITER ;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
