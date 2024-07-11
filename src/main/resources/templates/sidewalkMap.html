@@ -78,13 +78,8 @@ ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
 <script src="https://code.jquery.com/jquery-3.7.1.slim.js"
         integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc="
         crossorigin="anonymous"></script>
+<script id="apikey" type="text/javascript" th:src="${@environment.getProperty('api-key.kakao-map-api')}"></script>
 <script type="text/javascript" src="/js/bootstrap.bundle.js"></script>
-<script id="apikey" type="text/javascript"
-        src="//dapi.kakao.com/v2/maps/sdk.js?appkey=36d7d56dffc065ea26aa515b442d5b6f"></script>
-<!-- services와 clusterer, drawing 라이브러리 불러오기 -->
-<script type="text/javascript"
-        src="//dapi.kakao.com/v2/maps/sdk.js?appkey=36d7d56dffc065ea26aa515b442d5b6f&libraries=services,clusterer,drawing"></script>
-<script type="text/javascript" src="/js/apikey.js"></script>
 <script type="text/javascript" src="/js/objects.js"></script>
 <script type="text/javascript" src="/js/marker.js"></script>
 <script type="text/javascript" src="/js/polyLine.js"></script>
