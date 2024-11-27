@@ -66,113 +66,126 @@ function vertexAddEventListener(marker, isNormalVertex) {
     });
     kakao.maps.event.addListener(marker, 'mousedown', function () {
         vertexMouseDownBegin = new Date();
+        setTimeout(() => {
+            /*
+            * 원래 오른쪽 클릭은 click eventListener에 있었는데, 2024.11.27. 확인해보니
+            * kakao map api의 event listener에서 더 이상 오른쪽 클릭이 click event로 감지되지 않음을 확인함.
+            * 따라서 mousedown event listener에서 오른쪽 클릭에 관련된 로직을 실행하도록 바꾸었음.
+            * 추가로 예전에는 javascript의 event listener가 kakao map api의 event listener 보다 감지 속도가 빨라 setTimeOut()을 사용하지 않았지만,
+            * 2024.11.27. 확인해보니 kakao map api의 감지속도가 javascript의 event 감지속도보다 빠른 경우가 있어 setTimeOut()을 사용해 10ms 기다렸다가 로직을 실행하도록 수정함.
+            */
+            if (isRightClick) {
+                //console.log("mousedown: right click");
+                edgeControl(marker);
+            }
+        }, 10);
     });
+    /*kakao.maps.event.addListener(marker, 'rightclick', function () {
+        console.log("1234124124124124");
+    });*/
     kakao.maps.event.addListener(marker, 'click', function () {
         if (polyLineMouseOver) return;
-        if (isRightClick) {
-            edgeControl(marker);
+        //console.log("circle click!");
+        vertexMouseDownEnd = new Date();
+        //console.log(mouseDownBegin, mouseDownEnd, mouseDownEnd - mouseDownBegin);
+        if (vertexMouseDownEnd - vertexMouseDownBegin < 300) {
+            /*마커를 지도에서 지운다.*/
+            marker.setMap(null);
+
+            /*마커 배열을 순회하며 지워야 할 마커를 찾아 지운다.*/
+            for (let i = 0; i < markers.length; i++) {
+                if (markers[i] !== marker) continue;
+                //console.log(i);
+                /*마커와 관련있는 간선과 관련된 정보들을 지운다.*/
+                for (let j = 0; j < edges.length; j++) {
+                    if (edges[j][0] !== i && edges[j][1] !== i) continue;
+                    lines[j].setMap(null);
+                    lines.splice(j, 1);
+                    edges.splice(j, 1);
+                    edgeLength.splice(j, 1);
+                    j--;
+                }
+
+                /*마커가 지워졌을 때 마커의 아이디가 1씩 당겨지므로 간선을 이루는 아이디도 1씩 당긴다.*/
+                for (let j = 0; j < edges.length; j++) {
+                    if (edges[j][0] > i) edges[j][0]--;
+                    if (edges[j][1] > i) edges[j][1]--;
+                }
+
+                positions.splice(i, 1);
+                markers.splice(i, 1);
+                if (objects[i] !== null) vertexMouseOver = 0;
+                objects.splice(i, 1);
+                deleteVertex(i);
+                break;
+            }
         } else {
-            //console.log("circle click!");
-            vertexMouseDownEnd = new Date();
-            //console.log(mouseDownBegin, mouseDownEnd, mouseDownEnd - mouseDownBegin);
-            if (vertexMouseDownEnd - vertexMouseDownBegin < 300) {
-                /*마커를 지도에서 지운다.*/
-                marker.setMap(null);
-
-                /*마커 배열을 순회하며 지워야 할 마커를 찾아 지운다.*/
-                for (let i = 0; i < markers.length; i++) {
-                    if (markers[i] !== marker) continue;
-                    //console.log(i);
-                    /*마커와 관련있는 간선과 관련된 정보들을 지운다.*/
-                    for (let j = 0; j < edges.length; j++) {
-                        if (edges[j][0] !== i && edges[j][1] !== i) continue;
-                        lines[j].setMap(null);
-                        lines.splice(j, 1);
-                        edges.splice(j, 1);
-                        edgeLength.splice(j, 1);
-                        j--;
+            let obj = null;
+            for (let i = 0; i < markers.length; i++) {
+                if (marker === markers[i]) {
+                    obj = objects[i];
+                    if (obj === null) {
+                        if (window.location.href.indexOf("road") !== -1) {
+                            RId = i + 1;
+                            SWId = null;
+                        } else {
+                            RId = null;
+                            SWId = i + 1;
+                        }
+                        Lat = marker.getPosition().getLat();
+                        Lng = marker.getPosition().getLng();
+                    } else {
+                        getObjectsInfo(obj.id).then(info => {
+                            //console.log(info);
+                            RId = info.roadVertexId;
+                            SWId = info.sidewalkVertexId;
+                            Lat = info.latitude;
+                            Lng = info.longitude;
+                        });
                     }
-
-                    /*마커가 지워졌을 때 마커의 아이디가 1씩 당겨지므로 간선을 이루는 아이디도 1씩 당긴다.*/
-                    for (let j = 0; j < edges.length; j++) {
-                        if (edges[j][0] > i) edges[j][0]--;
-                        if (edges[j][1] > i) edges[j][1]--;
-                    }
-
-                    positions.splice(i, 1);
-                    markers.splice(i, 1);
-                    if (objects[i] !== null) vertexMouseOver = 0;
-                    objects.splice(i, 1);
-                    deleteVertex(i);
+                    //console.log(RId, SWId, Lat, Lng);
                     break;
                 }
-            } else {
-                let obj = null;
-                for (let i = 0; i < markers.length; i++) {
-                    if (marker === markers[i]) {
-                        obj = objects[i];
-                        if (obj === null) {
-                            if (window.location.href.indexOf("road") !== -1) {
-                                RId = i + 1;
-                                SWId = null;
-                            } else {
-                                RId = null;
-                                SWId = i + 1;
-                            }
-                            Lat = marker.getPosition().getLat();
-                            Lng = marker.getPosition().getLng();
-                        } else {
-                            getObjectsInfo(obj.id).then(info => {
-                                //console.log(info);
-                                RId = info.roadVertexId;
-                                SWId = info.sidewalkVertexId;
-                                Lat = info.latitude;
-                                Lng = info.longitude;
-                            });
-                        }
-                        //console.log(RId, SWId, Lat, Lng);
-                        break;
-                    }
-                }
-                let id = document.getElementById("id");
-                let name = document.getElementById("name");
-                let description = document.getElementById("description");
-                let objectType = document.getElementById("objectType");
-                let existingAddress = document.getElementById("existingAddress");
-                let newAddress = document.getElementById("newAddress");
-                if (obj !== null) {
-                    id.value = obj.id;
-                    name.value = obj.name;
-                    description.value = obj.description;
-                    objectType.value = obj.objectType;
-                    let option = Array.from(existingAddress.options).map(option => {
-                        if (option.text === obj.address) option.selected = true;
-                    });
-                    newAddress.value = null;
-                } else {
-                    id.value = null;
-                    name.value = null;
-                    description.value = null;
-                    let option = Array.from(existingAddress.options).map(option => {
-                        if (option.text === "없음") option.selected = true;
-                    });
-                    newAddress.value = null;
-                }
-
-                //console.log(obj);
-                $("#objectFormModal").modal("show");
             }
+            let id = document.getElementById("id");
+            let name = document.getElementById("name");
+            let description = document.getElementById("description");
+            let objectType = document.getElementById("objectType");
+            let existingAddress = document.getElementById("existingAddress");
+            let newAddress = document.getElementById("newAddress");
+            if (obj !== null) {
+                id.value = obj.id;
+                name.value = obj.name;
+                description.value = obj.description;
+                objectType.value = obj.objectType;
+                let option = Array.from(existingAddress.options).map(option => {
+                    if (option.text === obj.address) option.selected = true;
+                });
+                newAddress.value = null;
+            } else {
+                id.value = null;
+                name.value = null;
+                description.value = null;
+                let option = Array.from(existingAddress.options).map(option => {
+                    if (option.text === "없음") option.selected = true;
+                });
+                newAddress.value = null;
+            }
+
+            //console.log(obj);
+            $("#objectFormModal").modal("show");
         }
     });
-    if (!isNormalVertex) kakao.maps.event.addListener(marker, 'rightclick', function () {
+    /*if (!isNormalVertex) kakao.maps.event.addListener(marker, 'rightclick', function () {
         edgeControl(marker);
-    });
+    });*/
 }
 
 /**
  * 정점을 이용해 간선을 추가하거나 삭제하는데 사용되는 함수이다.
  */
 function edgeControl(marker) {
+    console.log(vertexForEdge[0], vertexForEdge[1]);
     if (vertexForEdge[0] === -1) {
         for (let i = 0; i < markers.length; i++) {
             if (marker === markers[i]) {
@@ -185,6 +198,7 @@ function edgeControl(marker) {
             if (marker === markers[i]) {
                 let isDelete = 0;
                 vertexForEdge[1] = i;
+                console.log(vertexForEdge[0], vertexForEdge[1]);
                 if (vertexForEdge[0] === vertexForEdge[1]) {
                     vertexForEdge = [-1, -1];
                     return;
